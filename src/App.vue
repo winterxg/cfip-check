@@ -20,7 +20,7 @@
               {{ $t('nav.home') }}
             </a>
 
-            <a class="navbar-item" href="https://github.com/yourusername/yourrepository">
+            <a class="navbar-item" href="https://github.com/6Kmfi6HP/EDtunnel">
               {{ $t('nav.github') }}
             </a>
           </div>
@@ -28,7 +28,7 @@
           <div class="navbar-end">
             <div class="navbar-item">
               <div class="buttons">
-                <a class="button is-light" href="https://t.me/edtunnel">
+                <a class="button is-light" href="https://t.me/edtunnel_chat">
                   <strong>{{ $t('nav.contact') }}</strong>
                 </a>
                 <button class="button is-light" @click="toggleLanguage">
@@ -126,7 +126,7 @@
         <div class="content has-text-centered">
           <p>{{ $t('footer.description') }}</p>
           <p>
-            <a href="https://github.com/yourusername/yourrepository" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/6Kmfi6HP/EDtunnel" target="_blank" rel="noopener noreferrer">
               {{ $t('footer.viewOnGithub') }}
             </a>
           </p>
@@ -286,7 +286,7 @@ export default {
           this.filteredData = {};
           this.errorMessage = '检测出错：' + (err.message || '未知错误');
           if (err.message.includes('500')) {
-            this.errorMessage += '。服务器内部错误，请稍后再试。';
+            this.errorMessage += 'this ip not working。服务器内部错误，请稍后再试。';
           }
         })
         .finally(() => {
@@ -295,7 +295,33 @@ export default {
     },
 
     async processData(data) {
-      const ipsbData = await this.fetchIpsbData(data.ip);
+      let ipsbData = null;
+      try {
+        // First check if ip.sb is accessible
+        const checkResponse = await fetch('https://api.ip.sb/geoip');
+        if (!checkResponse.ok) {
+          throw new Error('ip.sb API is not accessible');
+        }
+        ipsbData = await this.fetchIpsbData(data.ip);
+      } catch (error) {
+        console.error('Error accessing ip.sb:', error);
+        this.$buefy.notification.open({
+          message: 'ip.sb API is not accessible. Location data will be limited.',
+          type: 'is-warning',
+          duration: 5000
+        });
+      }
+
+      // Set mapData even if ipsbData is null
+      if (ipsbData && ipsbData.latitude && ipsbData.longitude) {
+        this.mapData = {
+          latitude: ipsbData.latitude,
+          longitude: ipsbData.longitude
+        };
+      } else {
+        this.mapData = null;
+      }
+
       return {
         'IP': data.ip,
         'Location': ipsbData ? `${ipsbData.country}, ${ipsbData.country_code}` : 'Unknown',
@@ -321,13 +347,23 @@ export default {
       }
     },
     initMap() {
-      if (!this.mapData || !this.$refs.mapContainer) return;
+      if (!this.mapData || !this.$refs.mapContainer) {
+        if (this.$refs.mapContainer) {
+          this.$refs.mapContainer.innerHTML = '<div class="notification is-warning">Location data not available</div>';
+        }
+        return;
+      }
 
       const { latitude, longitude } = this.mapData;
       const lat = parseFloat(latitude);
       const lon = parseFloat(longitude);
 
-      if (isNaN(lat) || isNaN(lon)) return;
+      if (isNaN(lat) || isNaN(lon)) {
+        if (this.$refs.mapContainer) {
+          this.$refs.mapContainer.innerHTML = '<div class="notification is-warning">Invalid location coordinates</div>';
+        }
+        return;
+      }
 
       // Remove existing map if it exists
       if (this.map) {
