@@ -15,7 +15,7 @@ export const messages = {
         submit: 'Submit',
         checking: 'Checking...',
         usage: 'Usage',
-        usageText: 'This is a CF IP remote check tool. Enter the server domain or IP, select the TLS option, and enter the host (which must be the same as SNI in CF) to proceed with the check.',
+        usageText: 'This is a CF IP remote check tool. Enter the server domain or IP, select the TLS option, and enter the host (which must be the same as SNI in CF) to proceed with the check. Proxy IP validation conditions: 1) Origin port must be 443; 2) Reverse being true means the requested IP matches the IP obtained from /cdn-cgi/trace.',
       },
       result: {
         info: 'INFO',
@@ -53,7 +53,7 @@ export const messages = {
         submit: '提交',
         checking: '检测中...',
         usage: '使用说明',
-        usageText: '这是一个 CF IP 远程检测工具。请输入服务器域名或 IP，选择 TLS 选项，并输入托管在 CF CDN 中的 HOST 主机，然后点击提交按钮进行检测。',
+        usageText: '这是一个 CF IP 远程检测工具。请输入服务器域名或 IP，选择 TLS 选项，并输入托管在 CF CDN 中的 HOST 主机，然后点击提交按钮进行检测。判断 proxy IP 的条件如下：1) Origin 回源端口必须是 443；2) Reverse 为 true 表示指定请求的 IP 和通过 /cdn-cgi/trace 获取到的 IP 相同。',
       },
       result: {
         info: '信息',
